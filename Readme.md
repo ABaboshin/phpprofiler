@@ -7,6 +7,7 @@ cd phpprofiler
 phpize
 ./configure
 make
-make test
+
+php -d extension=modules/phpprofiler.so test.php
 
 ```

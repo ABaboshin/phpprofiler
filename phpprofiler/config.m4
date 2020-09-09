@@ -90,5 +90,5 @@ if test "$PHP_PHPPROFILER" != "no"; then
   dnl In case of no dependencies
   AC_DEFINE(HAVE_PHPPROFILER, 1, [ Have phpprofiler support ])
 
-  PHP_NEW_EXTENSION(phpprofiler, phpprofiler.c, $ext_shared)
+  PHP_NEW_EXTENSION(phpprofiler, phpprofiler.c engine_hooks.c zend_handlers.c, $ext_shared)
 fi
