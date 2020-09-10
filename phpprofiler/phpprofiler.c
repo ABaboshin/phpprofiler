@@ -66,7 +66,7 @@ PHP_FUNCTION(trace_method)
   zval* tracing_function;
 
   // https://www.php.net/manual/de/internals2.funcs.php
-  if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zzO", &class_name, &method_name,
+  if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zzz", &class_name, &method_name,
                                  &tracing_function, zend_ce_closure) != SUCCESS
                                  || Z_TYPE_P(class_name) != IS_STRING
                                  || Z_TYPE_P(method_name) != IS_STRING
