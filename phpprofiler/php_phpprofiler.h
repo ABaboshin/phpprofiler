@@ -1,9 +1,6 @@
-/* phpprofiler extension for PHP */
+#pragma once
 
-#ifndef PHP_PHPPROFILER_H
-# define PHP_PHPPROFILER_H
-
-#include "engine_hooks.h"
+#include "hooks.h"
 #include "zend_handlers.h"
 
 extern zend_module_entry phpprofiler_module_entry;
@@ -15,5 +12,3 @@ extern zend_extension phpprofiler_zend_extension_entry;
 # if defined(ZTS) && defined(COMPILE_DL_PHPPROFILER)
 ZEND_TSRMLS_CACHE_EXTERN()
 # endif
-
-#endif	/* PHP_PHPPROFILER_H */

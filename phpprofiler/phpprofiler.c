@@ -7,6 +7,7 @@
 #include "php.h"
 #include "Zend/zend_extensions.h"
 #include "Zend/zend_vm.h"
+#include "Zend/zend_closures.h"
 #include "ext/standard/info.h"
 #include "php_phpprofiler.h"
 #include <stdio.h>
@@ -58,7 +59,47 @@ PHP_MINFO_FUNCTION(phpprofiler)
 	php_info_print_table_end();
 }
 
-static int phpprofiler_zend_extension_startup(struct _zend_extension *extension) {
+PHP_FUNCTION(trace_method)
+{
+  zval* class_name;
+  zval* method_name;
+  zval* tracing_function;
+
+  // https://www.php.net/manual/de/internals2.funcs.php
+  if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zzO", &class_name, &method_name,
+                                 &tracing_function, zend_ce_closure) != SUCCESS
+                                 || Z_TYPE_P(class_name) != IS_STRING
+                                 || Z_TYPE_P(method_name) != IS_STRING
+                                 )
+                                 {
+                                   RETURN_BOOL(0);
+                                 }
+
+  zend_bool result = register_hook(class_name, method_name, tracing_function);
+
+  RETURN_BOOL(result);
+}
+
+PHP_FUNCTION(trace_function)
+{
+  zval* function_name;
+  zval* tracing_function;
+
+  // https://www.php.net/manual/de/internals2.funcs.php
+  if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sO", &function_name,
+                                 &tracing_function, zend_ce_closure) != SUCCESS
+                                 || Z_TYPE_P(function_name) != IS_STRING
+                                 )
+                                 {
+                                   RETURN_BOOL(0);
+                                 }
+
+  zend_bool result = register_hook(NULL, function_name, tracing_function);
+
+  RETURN_BOOL(result);
+}
+
+int phpprofiler_zend_extension_startup(struct _zend_extension *extension) {
     phpprofiler_resource = zend_get_resource_handle(extension);
 
     fprintf(stdout, "phpprofiler_zend_extension_startup\n");
@@ -67,12 +108,25 @@ static int phpprofiler_zend_extension_startup(struct _zend_extension *extension)
     return SUCCESS;
 }
 
-static void phpprofiler_zend_extension_shutdown(struct _zend_extension *extension) {}
+void phpprofiler_zend_extension_shutdown(struct _zend_extension *extension) {}
 
-static void phpprofiler_zend_extension_activate(void) {}
-static void phpprofiler_zend_extension_deactivate(void) {}
+void phpprofiler_zend_extension_activate(void) {}
+void phpprofiler_zend_extension_deactivate(void) {}
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_trace_method, 0, 0, 3)
+ZEND_ARG_INFO(0, class_name)
+ZEND_ARG_INFO(0, method_name)
+ZEND_ARG_INFO(0, tracing_function)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_trace_function, 0, 0, 2)
+ZEND_ARG_INFO(0, function_name)
+ZEND_ARG_INFO(0, tracing_function)
+ZEND_END_ARG_INFO()
 
 static const zend_function_entry phpprofiler_functions[] = {
+  PHP_FE(trace_method, arginfo_trace_method)
+  PHP_FE(trace_function, arginfo_trace_function)
 	PHP_FE_END
 };
 
