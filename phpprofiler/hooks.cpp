@@ -1,7 +1,6 @@
-// #include "hooks.h"
+#include <iostream>
 #include "Zend/zend_types.h"
 #include <php.h>
-#include <iostream>
 
 int phpprofiler_resource = -2;
 

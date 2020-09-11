@@ -45,8 +45,9 @@ PHP_MINIT_FUNCTION(phpprofiler)
   dlopen(infos.dli_fname, RTLD_LAZY);
 
   // TODO signal handler for SIGSEGV on an alternate stack
-  // TODO init a client for the metrics storage (prometheus, jaeger)
-  // TODO intercept opcodes like ZEND_DO_UCALL/ZEND_DO_FCALL/ZEND_DO_FCALL_BY_NAME
+
+  intercept_opcodes();
+
   // TODO register integrations
 
 	return SUCCESS;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine.h"
 #include "hooks.h"
 #include "zend_handlers.h"
 
