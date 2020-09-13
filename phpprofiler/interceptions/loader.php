@@ -21,11 +21,22 @@ class TestInterceptor2 {
     {
       print "TestInterceptor2::ExecuteAfter $data\n";
     }
+
+    function ExecuteException($data)
+    {
+      print "TestInterceptor2::ExecuteException $data\n";
+    }
+
+    function ExecuteYield($data)
+    {
+      print "TestInterceptor2::ExecuteYield $data\n";
+    }
 }
 
 // trace_method("TestClass", "TestMethod", 'TestInterceptor');
 // trace_method("TestClass", "TestMethod2", 'TestInterceptor2');
 
 trace_method("", "testF", 'TestInterceptor2');
+trace_method("", "testY", 'TestInterceptor2');
 
 ?>

@@ -214,7 +214,6 @@ void processReturn(zend_execute_data *data)
       GET(callStack) = popStack(GET(callStack));
     }
   }
-
 }
 
 void processReturnByRef(zend_execute_data *data)
@@ -232,7 +231,39 @@ void processYieldFrom(zend_execute_data *data)
   fprintf(stdout, "processYieldFrom\n");
 }
 
+void CallInterceptorException(zval *interceptor, zend_execute_data *execute_data)
+{
+  zend_class_entry* interceptorClass = zend_lookup_class_ex(Z_STR_P(interceptor), NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+  zval obj;
+  object_init_ex(&obj, interceptorClass);
+
+  zend_string* ctr = zend_string_init(ZEND_STRL("__construct"), 0);
+  CallFunctionByName(interceptorClass, &obj, ctr, NULL);
+  zend_string_release(ctr);
+
+  zend_string* eb = zend_string_init(ZEND_STRL("ExecuteException"), 0);
+  CallFunctionByName(interceptorClass, &obj, eb, EG(exception));
+  zend_string_release(eb);
+}
+
 void processException(zend_execute_data *data)
 {
-  fprintf(stdout, "processException\n");
+  if (GET(callStack)) {
+    fprintf(stdout, "found stack 1\n");
+    CallStack* top = GET(callStack);
+    fprintf(stdout, "found stack 2 %p %p\n", top->data, data->call);
+    if (top->data == data) {
+      fprintf(stdout, "found stack\n");
+      zval *interceptor;
+      zend_hash_internal_pointer_reset(top->interceptors);
+      while ((interceptor = zend_hash_get_current_data(top->interceptors)) != NULL)
+      {
+        CallInterceptorException(interceptor, data);
+
+        zend_hash_move_forward(top->interceptors);
+      }
+
+      GET(callStack) = popStack(GET(callStack));
+    }
+  }
 }

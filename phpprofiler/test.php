@@ -18,15 +18,24 @@ class TestClass {
 
 function testF($i, $str)
 {
+  throw new Exception("Error Processing Request", 1);
+
   if ($i > 0) testF($i - 1, $str);
   print "testF $i\n";
   return $i;
 }
 
+function testY($a, $str)
+{
+yield 1;
+yield 2;
+}
+
 // $test = new TestClass();
 // $test->TestMethod();
 
-testF(1, "test");
+// testF(1, "test");
+testY(1, "test");
 
 // trace_method("TestClass", "TestMethod", TestClass::class);
 // trace_method("", "curl_exec", TestClass::class);
@@ -36,4 +45,6 @@ testF(1, "test");
 // $output = curl_exec($ch);
 // curl_close($ch);
 // print $output;
+
+print "done\n";
 ?>
