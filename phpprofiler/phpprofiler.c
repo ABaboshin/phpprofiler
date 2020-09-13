@@ -41,15 +41,25 @@ PHP_RINIT_FUNCTION(phpprofiler)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
+  // memset(phpprofiler_globals, 0, sizeof(zend_phpprofiler_globals));
+
   fprintf(stdout, "PHP_RINIT_FUNCTION\n");
 
   // catch exceptions
   ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
   EG(exception_op)->opcode = ZEND_HANDLE_EXCEPTION;
 
+  // init structures
+  initInterceptors();
+
   injectLoader();
 
 	return SUCCESS;
+}
+
+static PHP_GINIT_FUNCTION(phpprofiler) {
+  fprintf(stdout, "PHP_GINIT_FUNCTION\n");
+  memset(phpprofiler_globals, 0, sizeof(zend_phpprofiler_globals));
 }
 
 PHP_MINIT_FUNCTION(phpprofiler)
@@ -171,7 +181,11 @@ zend_module_entry phpprofiler_module_entry = {
 	NULL,							/* PHP_RSHUTDOWN - Request shutdown */
 	PHP_MINFO(phpprofiler),			/* PHP_MINFO - Module info */
 	PHP_PHPPROFILER_VERSION,		/* Version */
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(phpprofiler),
+  PHP_GINIT(phpprofiler),
+  NULL,
+  NULL,
+  STANDARD_MODULE_PROPERTIES_EX
 };
 
 zend_extension phpprofiler_zend_extension_entry = {

@@ -18,6 +18,9 @@ ZEND_BEGIN_MODULE_GLOBALS(phpprofiler)
   HashTable* lookup;
 ZEND_END_MODULE_GLOBALS(phpprofiler)
 
+ZEND_EXTERN_MODULE_GLOBALS(phpprofiler);
+
+// https://www.php.net/manual/de/internals2.structure.globals.php
 #ifdef ZTS
 #define GET(member) TSRMG(phpprofiler_globals_id, zend_phpprofiler_globals *, member)
 #else
