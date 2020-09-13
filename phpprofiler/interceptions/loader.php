@@ -7,6 +7,14 @@ class TestInterceptor {
     }
 }
 
+class TestInterceptor2 {
+    function __construct() {
+        print "TestInterceptor2::__construct\n";
+    }
+}
+
 trace_method("TestClass", "TestMethod", 'TestInterceptor');
+
+trace_method("", "testF", 'TestInterceptor2');
 
 ?>
