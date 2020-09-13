@@ -9,7 +9,7 @@ print "loader.php executed\n";
 
 class TestInterceptor2 {
     function __construct() {
-        print "TestInterceptor2::__construct\n";
+        // print "TestInterceptor2::__construct\n";
     }
 
     function ExecuteBefore($data)
@@ -19,7 +19,7 @@ class TestInterceptor2 {
 
     function ExecuteAfter($data)
     {
-      print "TestInterceptor2::ExecuteBefore $data[0] $data[1] $data[2]\n";
+      print "TestInterceptor2::ExecuteAfter $data\n";
     }
 }
 

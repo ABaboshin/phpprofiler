@@ -8,11 +8,6 @@
 
 #include "interceptor.h"
 
-// typedef struct {
-//   zend_execute_data* data;
-//   HashTable* interceptors;
-// } CallStack;
-
 HashTable* getClassLookupStr(zend_string *className TSRMLS_DC)
 {
   if (!className) {
@@ -102,7 +97,7 @@ void CallFunctionByName(zend_class_entry* interceptorClass, zval* obj, zend_stri
   zend_call_function(&fci, &fcc);
 }
 
-void CallInterceptor(zval *interceptor, zend_execute_data *data)
+void CallInterceptorBefore(zval *interceptor, zend_execute_data *data)
 {
   zend_class_entry* interceptorClass = zend_lookup_class_ex(Z_STR_P(interceptor), NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
   zval obj;
@@ -137,40 +132,18 @@ void ProcessMethodCall (zend_execute_data *data)
 
   zval *interceptor;
 
-fprintf(stdout, "enter %p %p %s\n", data, data->call, ZSTR_VAL(data->call->func->common.function_name));
+  // fprintf(stdout, "enter %p %p %s\n", data, data->call, ZSTR_VAL(data->call->func->common.function_name));
 
   if (!GET(callStack)) {
-    fprintf(stdout, "create stack\n");
     GET(callStack) = createNewStack(data->call, methodLookup);
-    fprintf(stdout, "stack created\n");
-    GET(callStack)->next = NULL;
   } else {
-    GET(callStack)->next = NULL;
-    // pushStack(GET(callStack), data->call, methodLookup);
-    fprintf(stdout, "stack exists\n");
+    GET(callStack) = pushStack(GET(callStack), data->call, methodLookup);
   }
-
-  // CallStack* cs = malloc(sizeof(CallStack));
-  // cs->data = data->call;
-  // cs->interceptors = methodLookup;
-
-  // CallStack cs = {
-  //   .data = data->call,
-  //   .interceptors = methodLookup
-  // };
-
-  // add_next_index_zval(&GET(callStack), cs);
-
-  // fprintf(stdout, "push %p %p %s\n", cs, cs->data, ZSTR_VAL(data->call->func->common.function_name));
-
-  // fprintf(stdout, "enter %p %p %s\n", data, data->call, ZSTR_VAL(data->call->func->common.function_name));
 
   zend_hash_internal_pointer_reset(methodLookup);
   while ((interceptor = zend_hash_get_current_data(methodLookup)) != NULL)
   {
-    // fprintf(stdout, "Found %s\n", ZSTR_VAL(Z_STR_P(interceptor)));
-
-    CallInterceptor(interceptor, data);
+    CallInterceptorBefore(interceptor, data);
 
     zend_hash_move_forward(methodLookup);
   }
@@ -191,38 +164,56 @@ void processFCallByName(zend_execute_data *data)
   ProcessMethodCall(data);
 }
 
+void CallInterceptorAfter(zval *interceptor, zend_execute_data *execute_data)
+{
+  zend_class_entry* interceptorClass = zend_lookup_class_ex(Z_STR_P(interceptor), NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+  zval obj;
+  object_init_ex(&obj, interceptorClass);
+
+  zend_string* ctr = zend_string_init(ZEND_STRL("__construct"), 0);
+  CallFunctionByName(interceptorClass, &obj, ctr, NULL);
+  zend_string_release(ctr);
+
+  zval vn;
+  zval *retval = NULL;
+  switch(execute_data->opline->op1_type) {
+    case IS_CONST:
+      retval = RT_CONSTANT(execute_data->opline, execute_data->opline->op1);
+      break;
+    case IS_TMP_VAR:
+    case IS_VAR:
+    case IS_CV:
+      retval = EX_VAR(execute_data->opline->op1.var);
+      break;
+  }
+
+  if (!retval || Z_TYPE_INFO_P(retval) == IS_UNDEF) {
+    ZVAL_NULL(&vn);
+    retval = &vn;
+  }
+
+  zend_string* eb = zend_string_init(ZEND_STRL("ExecuteAfter"), 0);
+  CallFunctionByName(interceptorClass, &obj, eb, retval);
+  zend_string_release(eb);
+}
+
 void processReturn(zend_execute_data *data)
 {
-  // fprintf(stdout, "deep %d\n", zend_hash_num_elements(Z_ARRVAL_P(&GET(callStack))));
+  if (GET(callStack)) {
+    CallStack* top = GET(callStack);
+    if (top->data == data) {
+      zval *interceptor;
+      zend_hash_internal_pointer_reset(top->interceptors);
+      while ((interceptor = zend_hash_get_current_data(top->interceptors)) != NULL)
+      {
+        CallInterceptorAfter(interceptor, data);
 
-  // uint32_t idx = Z_ARRVAL_P(&GET(callStack))->nNumUsed;
-  // if (idx < 1) return;
+        zend_hash_move_forward(top->interceptors);
+      }
 
-  // Bucket* p = Z_ARRVAL_P(&GET(callStack))->arData + idx;
-  // CallStack* val = (CallStack*)&p->val;
-
-  // if (val) {
-  //   fprintf(stdout, "deep %p %p %p\n", val, val->data, data);
-  // }
-
-  // fprintf(stdout, "leave %p %p\n", data, data->call);
-
-
-  // if (last && last == data)
-  // {
-  //   fprintf(stdout, "return from last %p\n", last);
-  // }
-  // fprintf(stdout, "call1 %p %p\n", data, data->call);
-  // if (!data->call || !data->call->func) return;
-  // fprintf(stdout, "call\n");
-  // zend_string* className = data->call->func->common.scope ? data->call->func->common.scope->name : NULL;
-
-  // HashTable* classLookup = getClassLookupStr(className TSRMLS_CC);
-  // if (!classLookup) return;
-
-  // HashTable* methodLookup = getMethodLookupStr(classLookup, data->call->func->common.function_name);
-  // if (!methodLookup) return;
-
+      GET(callStack) = popStack(GET(callStack));
+    }
+  }
 
 }
 

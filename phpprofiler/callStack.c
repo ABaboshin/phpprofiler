@@ -9,11 +9,12 @@ CallStack* createNewStack(zend_execute_data* data, HashTable* interceptors)
   cs->next = NULL;
   cs->prev = NULL;
   cs->isFirst = 1;
+
+  return cs;
 }
 
-void pushStack(CallStack* stack, zend_execute_data* data, HashTable* interceptors)
+CallStack* pushStack(CallStack* stack, zend_execute_data* data, HashTable* interceptors)
 {
-  fprintf(stdout, "pushStack\n");
   CallStack* cs = malloc(sizeof(struct CallStack));
   cs->data = data;
   cs->interceptors = interceptors;
@@ -21,9 +22,14 @@ void pushStack(CallStack* stack, zend_execute_data* data, HashTable* interceptor
   cs->prev = stack;
   cs->isFirst = 0;
 
-  fprintf(stdout, "pushStack2\n");
+  return cs;
+}
 
-  stack->next = cs;
+CallStack* popStack(CallStack* stack)
+{
+  CallStack* prev = stack->prev;
 
-  fprintf(stdout, "pushStack3\n");
+  free(stack);
+
+  return prev;
 }
