@@ -20,7 +20,7 @@ user_opcode_handler_t orig_handle_exception;
 ZEND_HOT int icall(zend_execute_data *data)
 {
   if (ZEND_DO_ICALL == data->opline->opcode && data->call->func) {
-    processCall(data);
+    processICall(data);
   }
 
   if (orig_icall) {
@@ -33,7 +33,7 @@ ZEND_HOT int icall(zend_execute_data *data)
 ZEND_HOT int ucall(zend_execute_data *data)
 {
   if (ZEND_DO_UCALL == data->opline->opcode && data->call->func) {
-    processCall(data);
+    processUCall(data);
   }
 
   if (orig_ucall) {
@@ -46,7 +46,7 @@ ZEND_HOT int ucall(zend_execute_data *data)
 ZEND_HOT int fcall(zend_execute_data *data)
 {
   if (ZEND_DO_FCALL == data->opline->opcode && data->call->func) {
-    processCall(data);
+    processFCall(data);
   }
 
   if (orig_fcall) {
@@ -59,7 +59,7 @@ ZEND_HOT int fcall(zend_execute_data *data)
 ZEND_HOT int fcall_by_name(zend_execute_data *data)
 {
   if (ZEND_DO_FCALL_BY_NAME == data->opline->opcode && data->call->func) {
-    processCall(data);
+    processFCallByName(data);
   }
 
   if (orig_fcall_by_name) {
@@ -72,7 +72,7 @@ ZEND_HOT int fcall_by_name(zend_execute_data *data)
 ZEND_HOT int _return(zend_execute_data *data)
 {
   if (ZEND_RETURN == data->opline->opcode) {
-    processCall(data);
+    processReturn(data);
   }
 
   if (orig_return) {
@@ -85,7 +85,7 @@ ZEND_HOT int _return(zend_execute_data *data)
 ZEND_HOT int _return_by_ref(zend_execute_data *data)
 {
   if (ZEND_RETURN_BY_REF == data->opline->opcode) {
-    processCall(data);
+    processReturnByRef(data);
   }
 
   if (orig_return_by_ref) {
@@ -98,7 +98,7 @@ ZEND_HOT int _return_by_ref(zend_execute_data *data)
 ZEND_HOT int _yield(zend_execute_data *data)
 {
   if (ZEND_YIELD == data->opline->opcode) {
-    processCall(data);
+    processYield(data);
   }
 
   if (orig_yield) {
@@ -111,7 +111,7 @@ ZEND_HOT int _yield(zend_execute_data *data)
 ZEND_HOT int _yield_from(zend_execute_data *data)
 {
   if (ZEND_YIELD_FROM == data->opline->opcode) {
-    processCall(data);
+    processYieldFrom(data);
   }
 
   if (orig_yield_from) {
@@ -124,7 +124,7 @@ ZEND_HOT int _yield_from(zend_execute_data *data)
 ZEND_HOT int handle_exception(zend_execute_data *data)
 {
   if (ZEND_HANDLE_EXCEPTION == data->opline->opcode) {
-    processCall(data);
+    processException(data);
   }
 
   if (orig_handle_exception) {
