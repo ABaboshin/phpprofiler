@@ -7,5 +7,5 @@ PHP_ARG_ENABLE([phpprofiler],
 if test "$PHP_PHPPROFILER" != "no"; then
   AC_DEFINE(HAVE_PHPPROFILER, 1, [ Have phpprofiler support ])
   PHP_REQUIRE_CXX()
-  PHP_NEW_EXTENSION(phpprofiler, phpprofiler.c hooks.cpp zend_handlers.cpp engine.cpp profiler.cpp, $ext_shared)
+  PHP_NEW_EXTENSION(phpprofiler, phpprofiler.c hooks.cpp zend_handlers.cpp engine.cpp profiler.cpp profiler_wrapper.cpp, $ext_shared)
 fi

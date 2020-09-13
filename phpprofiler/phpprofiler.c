@@ -33,15 +33,7 @@ PHP_RINIT_FUNCTION(phpprofiler)
   ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
   EG(exception_op)->opcode = ZEND_HANDLE_EXCEPTION;
 
-  char* loaderPath = getenv("PHPPROFILER_CONFIGURATION");
-
-  fprintf(stdout, "Rinit %s\n", loaderPath);
-
-  zend_file_handle loadFile;
-  memset(&loadFile, 0, sizeof(zend_file_handle));
-  loadFile.type = ZEND_HANDLE_FILENAME;
-  loadFile.filename = loaderPath;
-  zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, &loadFile);
+  injectLoader(IMPL);
 
 	return SUCCESS;
 }

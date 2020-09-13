@@ -8,4 +8,7 @@ extern "C"
 
 Profiler* createProfilerInstance();
 
-
+#ifdef __cplusplus
+extern "C"
+#endif
+void injectLoader(Profiler*);
