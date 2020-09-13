@@ -26,11 +26,6 @@ class TestInterceptor2 {
     {
       print "TestInterceptor2::ExecuteException $data\n";
     }
-
-    function ExecuteYield($data)
-    {
-      print "TestInterceptor2::ExecuteYield $data\n";
-    }
 }
 
 // trace_method("TestClass", "TestMethod", 'TestInterceptor');

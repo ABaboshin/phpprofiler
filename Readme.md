@@ -16,7 +16,7 @@ php -d extension=modules/phpprofiler.so test.php
 
 TODO:
  x intercept ZEND_DO_ICALL/ZEND_DO_UCALL/ZEND_DO_FCALL/ZEND_DO_FCALL_BY_NAME/ZEND_RETURN/ZEND_RETURN_BY_REF/ZEND_YIELD/ZEND_YIELD_FROM/ZEND_HANDLE_EXCEPTION
- - register interceptors on start
+ x register interceptors on start
  - instrument internal function
  - interface IInterceptor (before/after/skip)
  - BaseClass BaseInterceptor
