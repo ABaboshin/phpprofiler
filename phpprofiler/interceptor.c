@@ -74,6 +74,56 @@ void processICall(zend_execute_data *data)
   fprintf(stdout, "processICall\n");
 }
 
+void CallFunctionByName(zend_class_entry* interceptorClass, zval* obj, zend_string* methodName, zval *params)
+{
+  zend_function* ctorMethod = zend_std_get_static_method(interceptorClass, methodName, NULL);
+
+  zval retval;
+
+  zend_fcall_info fci;
+  fci.size = sizeof(zend_fcall_info);
+  fci.retval = &retval;
+  fci.params = params;
+  fci.object = Z_OBJ_P(obj);
+  fci.no_separation = 0;
+  fci.param_count = params ? 1 : 0;
+
+  ZVAL_STR(&fci.function_name, ctorMethod->common.function_name);
+
+  zend_fcall_info_cache fcc;
+
+  fcc.function_handler = ctorMethod;
+  fcc.calling_scope = interceptorClass;
+  fcc.called_scope = interceptorClass;
+  fcc.object = Z_OBJ_P(obj);
+
+  zend_call_function(&fci, &fcc);
+}
+
+void CallInterceptor(zval *interceptor, zend_execute_data *data)
+{
+  zend_class_entry* interceptorClass = zend_lookup_class_ex(Z_STR_P(interceptor), NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+  zval obj;
+  object_init_ex(&obj, interceptorClass);
+
+  zend_string* ctr = zend_string_init(ZEND_STRL("__construct"), 0);
+  CallFunctionByName(interceptorClass, &obj, ctr, NULL);
+  zend_string_release(ctr);
+
+  zval params;
+  array_init(&params);
+
+  for (int i = 1; i <= ZEND_CALL_NUM_ARGS(data->call); i++)
+  {
+    add_next_index_zval(&params, ZEND_CALL_ARG(data->call, i));
+    // fprintf(stdout, "param %d %d\n", i, Z_TYPE_P(ZEND_CALL_ARG(data->call, i)));
+  }
+
+  zend_string* eb = zend_string_init(ZEND_STRL("ExecuteBefore"), 0);
+  CallFunctionByName(interceptorClass, &obj, eb, &params);
+  zend_string_release(eb);
+}
+
 void ProcessMethodCall (zend_execute_data *data)
 {
   // fprintf(stdout, "ProcessMethodCall %s\n", ZSTR_VAL(data->call->func->common.function_name));
@@ -101,34 +151,7 @@ void ProcessMethodCall (zend_execute_data *data)
   {
     fprintf(stdout, "Found %s\n", ZSTR_VAL(Z_STR_P(interceptor)));
 
-    zend_class_entry* interceptorClass = zend_lookup_class_ex(Z_STR_P(interceptor), NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-    zval obj;
-    object_init_ex(&obj, interceptorClass);
-
-    zend_string* ctr = zend_string_init(ZEND_STRL("__construct"), 0);
-    zend_function* ctorMethod = zend_std_get_static_method(interceptorClass, ctr, NULL);
-    zend_string_release(ctr);
-
-    zval retval;
-
-    zend_fcall_info fci;
-    fci.size = sizeof(zend_fcall_info);
-    fci.retval = &retval;
-    fci.params = NULL;
-    fci.object = Z_OBJ_P(&obj);
-    fci.no_separation = 0;
-    fci.param_count = 0;
-
-    ZVAL_STR(&fci.function_name, ctorMethod->common.function_name);
-
-    zend_fcall_info_cache fcc;
-
-    fcc.function_handler = ctorMethod;
-    fcc.calling_scope = interceptorClass;
-    fcc.called_scope = interceptorClass;
-    fcc.object = Z_OBJ_P(&obj);
-
-    zend_call_function(&fci, &fcc);
+    CallInterceptor(interceptor, data);
 
     zend_hash_move_forward(methodLookup);
   }
