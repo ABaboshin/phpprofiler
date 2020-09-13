@@ -152,3 +152,16 @@ extern "C" void intercept_opcodes()
   zend_set_user_opcode_handler(ZEND_YIELD_FROM, _yield_from);
   zend_set_user_opcode_handler(ZEND_HANDLE_EXCEPTION, handle_exception);
 }
+
+extern "C" void cancel_intercept_opcodes ()
+{
+  zend_set_user_opcode_handler(ZEND_DO_ICALL, NULL);
+  zend_set_user_opcode_handler(ZEND_DO_UCALL, NULL);
+  zend_set_user_opcode_handler(ZEND_DO_FCALL, NULL);
+  zend_set_user_opcode_handler(ZEND_DO_FCALL_BY_NAME, NULL);
+  zend_set_user_opcode_handler(ZEND_RETURN, NULL);
+  zend_set_user_opcode_handler(ZEND_RETURN_BY_REF, NULL);
+  zend_set_user_opcode_handler(ZEND_YIELD, NULL);
+  zend_set_user_opcode_handler(ZEND_YIELD_FROM, NULL);
+  zend_set_user_opcode_handler(ZEND_HANDLE_EXCEPTION, NULL);
+}

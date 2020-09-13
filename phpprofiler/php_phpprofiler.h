@@ -13,3 +13,13 @@ extern zend_extension phpprofiler_zend_extension_entry;
 # if defined(ZTS) && defined(COMPILE_DL_PHPPROFILER)
 ZEND_TSRMLS_CACHE_EXTERN()
 # endif
+
+ZEND_BEGIN_MODULE_GLOBALS(phpprofiler)
+  void* impl;
+ZEND_END_MODULE_GLOBALS(phpprofiler)
+
+#ifdef ZTS
+#define IMPL TSRMG(phpprofiler_globals_id, zend_phpprofiler_globals *, impl)
+#else
+#define IMPL phpprofiler_globals.impl
+#endif

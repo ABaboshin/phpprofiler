@@ -2,11 +2,25 @@
 
 class TestClass {
     function __construct() {
-        print "Create TestClass\n";
+        print "TestClass::__construct\n";
+    }
+
+    public function TestMethod()
+    {
+      print "TestClass::TestMethod\n";
+    }
+
+    public function test()
+    {
+      print "TestClass::test\n";
     }
 }
 
+$test = new TestClass();
+$test->test();
+
 trace_method("TestClass", "TestMethod", TestClass::class);
+trace_method("", "curl_exec", TestClass::class);
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "google.de");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

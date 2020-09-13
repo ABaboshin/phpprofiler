@@ -20,6 +20,8 @@
 	ZEND_PARSE_PARAMETERS_END()
 #endif
 
+ZEND_DECLARE_MODULE_GLOBALS(phpprofiler)
+
 PHP_RINIT_FUNCTION(phpprofiler)
 {
 #if defined(ZTS) && defined(COMPILE_DL_PHPPROFILER)
@@ -31,12 +33,24 @@ PHP_RINIT_FUNCTION(phpprofiler)
   ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
   EG(exception_op)->opcode = ZEND_HANDLE_EXCEPTION;
 
+  char* loaderPath = getenv("PHPPROFILER_CONFIGURATION");
+
+  fprintf(stdout, "Rinit %s\n", loaderPath);
+
+  zend_file_handle loadFile;
+  memset(&loadFile, 0, sizeof(zend_file_handle));
+  loadFile.type = ZEND_HANDLE_FILENAME;
+  loadFile.filename = loaderPath;
+  zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, &loadFile);
+
 	return SUCCESS;
 }
 
 PHP_MINIT_FUNCTION(phpprofiler)
 {
-  fprintf(stdout, "Minit\n");
+  IMPL = createProfilerInstance();
+
+  fprintf(stdout, "PHP_MINIT_FUNCTION %p\n", IMPL);
 
   // in order to enable zend_extensions hooks
   Dl_info infos;
@@ -48,7 +62,14 @@ PHP_MINIT_FUNCTION(phpprofiler)
 
   intercept_opcodes();
 
-  // TODO register integrations
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(phpprofiler)
+{
+  fprintf(stdout, "PHP_MSHUTDOWN_FUNCTION\n");
+
+  cancel_intercept_opcodes();
 
 	return SUCCESS;
 }
