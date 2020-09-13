@@ -16,8 +16,15 @@ class TestClass {
     }
 }
 
+function testF()
+{
+  print "testF\n";
+}
+
 $test = new TestClass();
 $test->TestMethod();
+
+testF();
 
 // trace_method("TestClass", "TestMethod", TestClass::class);
 // trace_method("", "curl_exec", TestClass::class);

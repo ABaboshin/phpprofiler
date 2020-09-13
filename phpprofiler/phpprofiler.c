@@ -22,19 +22,32 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(phpprofiler)
 
+void injectLoader ()
+{
+  char* loaderPath = getenv("PHPPROFILER_CONFIGURATION");
+
+  fprintf(stdout, "Rinit %s\n", loaderPath);
+
+  zend_file_handle loadFile;
+  memset(&loadFile, 0, sizeof(zend_file_handle));
+  loadFile.type = ZEND_HANDLE_FILENAME;
+  loadFile.filename = loaderPath;
+  zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, &loadFile);
+}
+
 PHP_RINIT_FUNCTION(phpprofiler)
 {
 #if defined(ZTS) && defined(COMPILE_DL_PHPPROFILER)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
-  fprintf(stdout, "PHP_RINIT_FUNCTION %xlu %lu\n", IMPL, sizeof(void*));
+  fprintf(stdout, "PHP_RINIT_FUNCTION\n");
 
   // catch exceptions
   ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
   EG(exception_op)->opcode = ZEND_HANDLE_EXCEPTION;
 
-  injectLoader(IMPL);
+  injectLoader();
 
 	return SUCCESS;
 }

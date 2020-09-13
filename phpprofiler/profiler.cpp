@@ -4,18 +4,6 @@
 #include "profiler.h"
 #include "profiler_c.h"
 
-void Profiler::injectLoader()
-{
-  char* loaderPath = getenv("PHPPROFILER_CONFIGURATION");
-
-  std::cout << "inject on start " << loaderPath << std::endl;
-
-  zend_file_handle loadFile = {};
-  loadFile.type = ZEND_HANDLE_FILENAME;
-  loadFile.filename = loaderPath;
-  zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, &loadFile);
-}
-
 zend_bool Profiler::registerInterceptor(zval *className, zval *functionName, zval *interceptorClass)
 {
   // std::cout << "class " << ZSTR_VAL(Z_STR_P(className)) << " method " << ZSTR_VAL(Z_STR_P(functionName)) << " type " << std::hex << ZSTR_VAL(Z_STR_P(interceptorClass)) << std::endl;

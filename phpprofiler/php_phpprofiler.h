@@ -14,6 +14,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 # endif
 
 ZEND_BEGIN_MODULE_GLOBALS(phpprofiler)
+  HashTable* lookup;
   void* impl;
 ZEND_END_MODULE_GLOBALS(phpprofiler)
 

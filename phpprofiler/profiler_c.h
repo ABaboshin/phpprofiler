@@ -19,11 +19,4 @@ extern "C"
 #else
 extern
 #endif
-void injectLoader(Profiler*);
-
-#ifdef __cplusplus
-extern "C"
-#else
-extern
-#endif
 zend_bool registerInterceptor(Profiler*, zval *className, zval *functionName, zval *interceptorClass);

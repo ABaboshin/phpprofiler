@@ -10,14 +10,10 @@ Profiler* createProfilerInstance()
   return &*result;
 }
 
-void injectLoader(Profiler* profiler)
-{
-  profiler->injectLoader();
-}
-
 zend_bool registerInterceptor(Profiler* profiler, zval *className, zval *functionName, zval *interceptorClass)
 {
   std::cout << "registerInterceptor " << std::hex << profiler << std::endl;
-  std::cout << "registerInterceptor " << std::hex << profiler << " " << profiler->interceptors.size() << std::endl;
-  return profiler->registerInterceptor(className, functionName, interceptorClass);
+  // std::cout << "registerInterceptor " << std::hex << profiler << " " << profiler->interceptors.size() << std::endl;
+  return SUCCESS;
+  // return profiler->registerInterceptor(className, functionName, interceptorClass);
 }

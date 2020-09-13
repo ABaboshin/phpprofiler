@@ -17,6 +17,5 @@ std::vector<Interceptor> interceptors{};
 std::cout << "ctor " << interceptors.size() << std::endl;
   }
 
-  void injectLoader();
   zend_bool registerInterceptor(zval *className, zval *functionName, zval *interceptorClass);
 };
