@@ -1,5 +1,6 @@
 #pragma once
 
+#include "callStack.h"
 #include "engine.h"
 #include "interceptor.h"
 #include "zend_handlers.h"
@@ -16,6 +17,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 ZEND_BEGIN_MODULE_GLOBALS(phpprofiler)
   HashTable* lookup;
+  CallStack* callStack;
 ZEND_END_MODULE_GLOBALS(phpprofiler)
 
 ZEND_EXTERN_MODULE_GLOBALS(phpprofiler);

@@ -18,13 +18,15 @@ class TestClass {
 
 function testF($i, $str)
 {
-  print "testF\n";
+  if ($i > 0) testF($i - 1, $str);
+  print "testF $i\n";
+  return 3;
 }
 
 // $test = new TestClass();
 // $test->TestMethod();
 
-testF("test", 1);
+testF(1, "test");
 
 // trace_method("TestClass", "TestMethod", TestClass::class);
 // trace_method("", "curl_exec", TestClass::class);

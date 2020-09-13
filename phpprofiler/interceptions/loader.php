@@ -14,7 +14,12 @@ class TestInterceptor2 {
 
     function ExecuteBefore($data)
     {
-print "TestInterceptor2::ExecuteBefore $data[0] $data[1]\n";
+      print "TestInterceptor2::ExecuteBefore $data[0] $data[1]\n";
+    }
+
+    function ExecuteAfter($data)
+    {
+      print "TestInterceptor2::ExecuteBefore $data[0] $data[1] $data[2]\n";
     }
 }
 

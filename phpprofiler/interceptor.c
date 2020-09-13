@@ -8,6 +8,11 @@
 
 #include "interceptor.h"
 
+// typedef struct {
+//   zend_execute_data* data;
+//   HashTable* interceptors;
+// } CallStack;
+
 HashTable* getClassLookupStr(zend_string *className TSRMLS_DC)
 {
   if (!className) {
@@ -51,10 +56,7 @@ HashTable* getMethodLookup(HashTable* table, zval *methodName)
 zend_bool registerInterceptor(zval *className, zval *functionName, zval *interceptorClass)
 {
   HashTable* classLookup = getClassLookup(className TSRMLS_CC);
-  // fprintf(stdout, "registerInterceptor classLookup %p\n", classLookup);
-
   HashTable* methodLookup = getMethodLookup(classLookup, functionName);
-  // fprintf(stdout, "registerInterceptor methodLookup %p\n", methodLookup);
 
   zend_hash_add_new(methodLookup, Z_STR_P(interceptorClass), interceptorClass);
 
@@ -63,10 +65,10 @@ zend_bool registerInterceptor(zval *className, zval *functionName, zval *interce
 
 void initInterceptors()
 {
-  // fprintf(stdout, "initInterceptors\n");
-
   ALLOC_HASHTABLE(GET(lookup));
   zend_hash_init(GET(lookup), 8, NULL, ZVAL_PTR_DTOR, 0);
+  GET(callStack) = NULL;
+  // array_init(&GET(callStack));
 }
 
 void processICall(zend_execute_data *data)
@@ -116,7 +118,6 @@ void CallInterceptor(zval *interceptor, zend_execute_data *data)
   for (int i = 1; i <= ZEND_CALL_NUM_ARGS(data->call); i++)
   {
     add_next_index_zval(&params, ZEND_CALL_ARG(data->call, i));
-    // fprintf(stdout, "param %d %d\n", i, Z_TYPE_P(ZEND_CALL_ARG(data->call, i)));
   }
 
   zend_string* eb = zend_string_init(ZEND_STRL("ExecuteBefore"), 0);
@@ -126,30 +127,48 @@ void CallInterceptor(zval *interceptor, zend_execute_data *data)
 
 void ProcessMethodCall (zend_execute_data *data)
 {
-  // fprintf(stdout, "ProcessMethodCall %s\n", ZSTR_VAL(data->call->func->common.function_name));
-
   zend_string* className = data->call->func->common.scope ? data->call->func->common.scope->name : NULL;
 
-  // if (className)
-  // {
-  //   fprintf(stdout, "ProcessMethodCall from class %s\n", ZSTR_VAL(className));
-  // } else {
-  //   fprintf(stdout, "ProcessMethodCall from class NULL\n");
-  // }
-
   HashTable* classLookup = getClassLookupStr(className TSRMLS_CC);
-  // fprintf(stdout, "classLookup %p\n", classLookup);
   if (!classLookup) return;
+
   HashTable* methodLookup = getMethodLookupStr(classLookup, data->call->func->common.function_name);
-  // fprintf(stdout, "methodLookup %p\n", methodLookup);
   if (!methodLookup) return;
 
   zval *interceptor;
 
+fprintf(stdout, "enter %p %p %s\n", data, data->call, ZSTR_VAL(data->call->func->common.function_name));
+
+  if (!GET(callStack)) {
+    fprintf(stdout, "create stack\n");
+    GET(callStack) = createNewStack(data->call, methodLookup);
+    fprintf(stdout, "stack created\n");
+    GET(callStack)->next = NULL;
+  } else {
+    GET(callStack)->next = NULL;
+    // pushStack(GET(callStack), data->call, methodLookup);
+    fprintf(stdout, "stack exists\n");
+  }
+
+  // CallStack* cs = malloc(sizeof(CallStack));
+  // cs->data = data->call;
+  // cs->interceptors = methodLookup;
+
+  // CallStack cs = {
+  //   .data = data->call,
+  //   .interceptors = methodLookup
+  // };
+
+  // add_next_index_zval(&GET(callStack), cs);
+
+  // fprintf(stdout, "push %p %p %s\n", cs, cs->data, ZSTR_VAL(data->call->func->common.function_name));
+
+  // fprintf(stdout, "enter %p %p %s\n", data, data->call, ZSTR_VAL(data->call->func->common.function_name));
+
   zend_hash_internal_pointer_reset(methodLookup);
   while ((interceptor = zend_hash_get_current_data(methodLookup)) != NULL)
   {
-    fprintf(stdout, "Found %s\n", ZSTR_VAL(Z_STR_P(interceptor)));
+    // fprintf(stdout, "Found %s\n", ZSTR_VAL(Z_STR_P(interceptor)));
 
     CallInterceptor(interceptor, data);
 
@@ -159,29 +178,57 @@ void ProcessMethodCall (zend_execute_data *data)
 
 void processUCall(zend_execute_data *data)
 {
-  // fprintf(stdout, "processUCall\n");
   ProcessMethodCall(data);
 }
 
 void processFCall(zend_execute_data *data)
 {
-  // fprintf(stdout, "processFCall\n");
   ProcessMethodCall(data);
 }
 
 void processFCallByName(zend_execute_data *data)
 {
-  fprintf(stdout, "processFCallByName\n");
+  ProcessMethodCall(data);
 }
 
 void processReturn(zend_execute_data *data)
 {
-  fprintf(stdout, "processReturn\n");
+  // fprintf(stdout, "deep %d\n", zend_hash_num_elements(Z_ARRVAL_P(&GET(callStack))));
+
+  // uint32_t idx = Z_ARRVAL_P(&GET(callStack))->nNumUsed;
+  // if (idx < 1) return;
+
+  // Bucket* p = Z_ARRVAL_P(&GET(callStack))->arData + idx;
+  // CallStack* val = (CallStack*)&p->val;
+
+  // if (val) {
+  //   fprintf(stdout, "deep %p %p %p\n", val, val->data, data);
+  // }
+
+  // fprintf(stdout, "leave %p %p\n", data, data->call);
+
+
+  // if (last && last == data)
+  // {
+  //   fprintf(stdout, "return from last %p\n", last);
+  // }
+  // fprintf(stdout, "call1 %p %p\n", data, data->call);
+  // if (!data->call || !data->call->func) return;
+  // fprintf(stdout, "call\n");
+  // zend_string* className = data->call->func->common.scope ? data->call->func->common.scope->name : NULL;
+
+  // HashTable* classLookup = getClassLookupStr(className TSRMLS_CC);
+  // if (!classLookup) return;
+
+  // HashTable* methodLookup = getMethodLookupStr(classLookup, data->call->func->common.function_name);
+  // if (!methodLookup) return;
+
+
 }
 
 void processReturnByRef(zend_execute_data *data)
 {
-  fprintf(stdout, "processReturnByRef\n");
+  processReturn(data);
 }
 
 void processYield(zend_execute_data *data)
