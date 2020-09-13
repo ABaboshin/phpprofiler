@@ -145,7 +145,6 @@ PHP_FUNCTION(trace_function)
 int phpprofiler_zend_extension_startup(struct _zend_extension *extension) {
     fprintf(stdout, "phpprofiler_zend_extension_startup\n");
 
-    zend_handlers_startup();
     return SUCCESS;
 }
 

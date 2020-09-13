@@ -3,7 +3,6 @@
 #include "callStack.h"
 #include "engine.h"
 #include "interceptor.h"
-#include "zend_handlers.h"
 
 extern zend_module_entry phpprofiler_module_entry;
 extern zend_extension phpprofiler_zend_extension_entry;

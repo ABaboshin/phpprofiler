@@ -20,7 +20,7 @@ function testF($i, $str)
 {
   if ($i > 0) testF($i - 1, $str);
   print "testF $i\n";
-  return 3;
+  return $i;
 }
 
 // $test = new TestClass();
