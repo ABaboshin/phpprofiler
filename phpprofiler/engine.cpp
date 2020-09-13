@@ -42,7 +42,7 @@ extern "C" ZEND_HOT int ucall(zend_execute_data *data)
 extern "C" ZEND_HOT int fcall(zend_execute_data *data)
 {
   if (ZEND_DO_FCALL == data->opline->opcode && data->call->func) {
-    std::cout << "ZEND_DO_FCALL " << ZSTR_VAL(data->call->func->common.function_name) << std::endl;
+    std::cout << "ZEND_DO_FCALL " << ZSTR_VAL(data->call->func->common.function_name) << " " << std::hex << ZSTR_VAL(data->call->func->common.scope->name) << std::endl;
   }
 
   if (orig_fcall) {

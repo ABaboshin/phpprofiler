@@ -17,14 +17,14 @@ class TestClass {
 }
 
 $test = new TestClass();
-$test->test();
+$test->TestMethod();
 
-trace_method("TestClass", "TestMethod", TestClass::class);
-trace_method("", "curl_exec", TestClass::class);
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "google.de");
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-$output = curl_exec($ch);
-curl_close($ch);
-print $output;
+// trace_method("TestClass", "TestMethod", TestClass::class);
+// trace_method("", "curl_exec", TestClass::class);
+// $ch = curl_init();
+// curl_setopt($ch, CURLOPT_URL, "google.de");
+// curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+// $output = curl_exec($ch);
+// curl_close($ch);
+// print $output;
 ?>

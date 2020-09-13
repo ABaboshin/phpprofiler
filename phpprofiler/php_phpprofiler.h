@@ -1,7 +1,6 @@
 #pragma once
 
 #include "engine.h"
-#include "hooks.h"
 #include "zend_handlers.h"
 
 extern zend_module_entry phpprofiler_module_entry;

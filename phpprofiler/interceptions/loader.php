@@ -7,6 +7,6 @@ class TestInterceptor {
     }
 }
 
-trace_method("TestClass", "TestMethod", TestInterceptor::class);
+trace_method("TestClass", "TestMethod", 'TestInterceptor');
 
 ?>

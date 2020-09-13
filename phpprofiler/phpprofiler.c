@@ -28,8 +28,9 @@ PHP_RINIT_FUNCTION(phpprofiler)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
-  fprintf(stdout, "Rinit\n");
+  fprintf(stdout, "PHP_RINIT_FUNCTION %xlu %lu\n", IMPL, sizeof(void*));
 
+  // catch exceptions
   ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
   EG(exception_op)->opcode = ZEND_HANDLE_EXCEPTION;
 
@@ -42,7 +43,7 @@ PHP_MINIT_FUNCTION(phpprofiler)
 {
   IMPL = createProfilerInstance();
 
-  fprintf(stdout, "PHP_MINIT_FUNCTION %p\n", IMPL);
+  fprintf(stdout, "PHP_MINIT_FUNCTION %lu\n", IMPL);
 
   // in order to enable zend_extensions hooks
   Dl_info infos;
@@ -75,47 +76,52 @@ PHP_MINFO_FUNCTION(phpprofiler)
 
 PHP_FUNCTION(trace_method)
 {
-  zval* class_name;
-  zval* method_name;
-  zval* tracing_function;
+  zval* className;
+  zval* methodName;
+  zval* interceptorClass;
+
+  // fprintf(stdout, "trace_method %d %d %d\n",
+  // zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zzz", &className, &methodName,
+  //                                &interceptorClass, zend_ce_closure),
+  //                                Z_TYPE_P(className) != IS_STRING,
+  //                                Z_TYPE_P(methodName) != IS_STRING);
 
   // https://www.php.net/manual/de/internals2.funcs.php
-  if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zzz", &class_name, &method_name,
-                                 &tracing_function, zend_ce_closure) != SUCCESS
-                                 || Z_TYPE_P(class_name) != IS_STRING
-                                 || Z_TYPE_P(method_name) != IS_STRING
+  if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zzz", &className, &methodName,
+                                 &interceptorClass, zend_ce_closure) != SUCCESS
+                                 || Z_TYPE_P(className) != IS_STRING
+                                 || Z_TYPE_P(methodName) != IS_STRING
                                  )
                                  {
+                                  //  fprintf(stdout, "oops\n");
                                    RETURN_BOOL(0);
                                  }
 
-  zend_bool result = register_hook(class_name, method_name, tracing_function);
+  zend_bool result = registerInterceptor(IMPL, className, methodName, interceptorClass);
 
   RETURN_BOOL(result);
 }
 
 PHP_FUNCTION(trace_function)
 {
-  zval* function_name;
-  zval* tracing_function;
+  zval* functionName;
+  zval* interceptorClass;
 
   // https://www.php.net/manual/de/internals2.funcs.php
-  if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sO", &function_name,
-                                 &tracing_function, zend_ce_closure) != SUCCESS
-                                 || Z_TYPE_P(function_name) != IS_STRING
+  if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sO", &functionName,
+                                 &interceptorClass, zend_ce_closure) != SUCCESS
+                                 || Z_TYPE_P(functionName) != IS_STRING
                                  )
                                  {
                                    RETURN_BOOL(0);
                                  }
 
-  zend_bool result = register_hook(NULL, function_name, tracing_function);
+  zend_bool result = registerInterceptor(IMPL, NULL, functionName, interceptorClass);
 
   RETURN_BOOL(result);
 }
 
 int phpprofiler_zend_extension_startup(struct _zend_extension *extension) {
-    phpprofiler_resource = zend_get_resource_handle(extension);
-
     fprintf(stdout, "phpprofiler_zend_extension_startup\n");
 
     zend_handlers_startup();
@@ -128,14 +134,14 @@ void phpprofiler_zend_extension_activate(void) {}
 void phpprofiler_zend_extension_deactivate(void) {}
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_trace_method, 0, 0, 3)
-ZEND_ARG_INFO(0, class_name)
-ZEND_ARG_INFO(0, method_name)
-ZEND_ARG_INFO(0, tracing_function)
+ZEND_ARG_INFO(0, className)
+ZEND_ARG_INFO(0, methodName)
+ZEND_ARG_INFO(0, interceptorClass)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_trace_function, 0, 0, 2)
-ZEND_ARG_INFO(0, function_name)
-ZEND_ARG_INFO(0, tracing_function)
+ZEND_ARG_INFO(0, functionName)
+ZEND_ARG_INFO(0, interceptorClass)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry phpprofiler_functions[] = {
