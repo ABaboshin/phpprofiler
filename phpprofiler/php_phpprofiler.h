@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine.h"
+#include "interceptor.h"
 #include "zend_handlers.h"
 
 extern zend_module_entry phpprofiler_module_entry;
@@ -15,11 +16,10 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 ZEND_BEGIN_MODULE_GLOBALS(phpprofiler)
   HashTable* lookup;
-  void* impl;
 ZEND_END_MODULE_GLOBALS(phpprofiler)
 
 #ifdef ZTS
-#define IMPL TSRMG(phpprofiler_globals_id, zend_phpprofiler_globals *, impl)
+#define GET(member) TSRMG(phpprofiler_globals_id, zend_phpprofiler_globals *, member)
 #else
-#define IMPL phpprofiler_globals.impl
+#define GET(member) phpprofiler_globals.member
 #endif

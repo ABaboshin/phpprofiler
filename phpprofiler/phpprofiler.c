@@ -54,9 +54,7 @@ PHP_RINIT_FUNCTION(phpprofiler)
 
 PHP_MINIT_FUNCTION(phpprofiler)
 {
-  IMPL = createProfilerInstance();
-
-  fprintf(stdout, "PHP_MINIT_FUNCTION %lu\n", IMPL);
+  fprintf(stdout, "PHP_MINIT_FUNCTION\n");
 
   // in order to enable zend_extensions hooks
   Dl_info infos;
@@ -110,7 +108,7 @@ PHP_FUNCTION(trace_method)
                                    RETURN_BOOL(0);
                                  }
 
-  zend_bool result = registerInterceptor(IMPL, className, methodName, interceptorClass);
+  zend_bool result = registerInterceptor(className, methodName, interceptorClass);
 
   RETURN_BOOL(result);
 }
@@ -129,7 +127,7 @@ PHP_FUNCTION(trace_function)
                                    RETURN_BOOL(0);
                                  }
 
-  zend_bool result = registerInterceptor(IMPL, NULL, functionName, interceptorClass);
+  zend_bool result = registerInterceptor(NULL, functionName, interceptorClass);
 
   RETURN_BOOL(result);
 }
