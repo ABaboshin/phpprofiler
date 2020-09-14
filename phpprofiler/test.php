@@ -18,6 +18,8 @@ class TestClass {
 
 function testF($i, $str)
 {
+  throw new Exception("Error Processing Request", 1);
+
   if ($i > 0) testF($i - 1, $str);
   print "testF $i\n";
   return $i;

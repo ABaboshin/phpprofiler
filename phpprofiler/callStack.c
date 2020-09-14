@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include "callStack.h"
 
-CallStack* createNewStack(zend_execute_data* data, HashTable* interceptors)
+CallStack* createNewStack(zend_execute_data* data, zend_execute_data* call, HashTable* interceptors)
 {
   CallStack* cs = malloc(sizeof(struct CallStack));
   cs->data = data;
+  cs->call = call;
   cs->interceptors = interceptors;
   cs->next = NULL;
   cs->prev = NULL;
@@ -13,10 +14,11 @@ CallStack* createNewStack(zend_execute_data* data, HashTable* interceptors)
   return cs;
 }
 
-CallStack* pushStack(CallStack* stack, zend_execute_data* data, HashTable* interceptors)
+CallStack* pushStack(CallStack* stack, zend_execute_data* data, zend_execute_data* call, HashTable* interceptors)
 {
   CallStack* cs = malloc(sizeof(struct CallStack));
   cs->data = data;
+  cs->call = call;
   cs->interceptors = interceptors;
   cs->next = NULL;
   cs->prev = stack;

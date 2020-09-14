@@ -8,6 +8,7 @@
 
 struct CallStack {
   zend_execute_data* data;
+  zend_execute_data* call;
   HashTable* interceptors;
   struct CallStack* prev;
   struct CallStack* next;
@@ -16,6 +17,6 @@ struct CallStack {
 
 typedef struct CallStack CallStack;
 
-CallStack* createNewStack(zend_execute_data* data, HashTable* interceptors);
-CallStack* pushStack(CallStack* stack, zend_execute_data* data, HashTable* interceptors);
+CallStack* createNewStack(zend_execute_data* data, zend_execute_data* call, HashTable* interceptors);
+CallStack* pushStack(CallStack* stack, zend_execute_data* data, zend_execute_data* call, HashTable* interceptors);
 CallStack* popStack(CallStack* stack);
