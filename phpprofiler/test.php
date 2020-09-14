@@ -30,7 +30,7 @@ testF(1, "test");
 
 // trace_method("TestClass", "TestMethod", TestClass::class);
 // trace_method("", "curl_exec", TestClass::class);
-// $ch = curl_init();
+$ch = curl_init();
 // curl_setopt($ch, CURLOPT_URL, "google.de");
 // curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 // $output = curl_exec($ch);

@@ -101,12 +101,6 @@ PHP_FUNCTION(trace_method)
   zval* methodName;
   zval* interceptorClass;
 
-  // fprintf(stdout, "trace_method %d %d %d\n",
-  // zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zzz", &className, &methodName,
-  //                                &interceptorClass, zend_ce_closure),
-  //                                Z_TYPE_P(className) != IS_STRING,
-  //                                Z_TYPE_P(methodName) != IS_STRING);
-
   // https://www.php.net/manual/de/internals2.funcs.php
   if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zzz", &className, &methodName,
                                  &interceptorClass, zend_ce_closure) != SUCCESS
@@ -118,7 +112,29 @@ PHP_FUNCTION(trace_method)
                                    RETURN_BOOL(0);
                                  }
 
-  zend_bool result = registerInterceptor(className, methodName, interceptorClass);
+  zend_bool result = registerInterceptor(className, methodName, interceptorClass, 0);
+
+  RETURN_BOOL(result);
+}
+
+PHP_FUNCTION(trace_method_internal)
+{
+  zval* className;
+  zval* methodName;
+  zval* interceptorClass;
+
+  // https://www.php.net/manual/de/internals2.funcs.php
+  if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zzz", &className, &methodName,
+                                 &interceptorClass, zend_ce_closure) != SUCCESS
+                                 || Z_TYPE_P(className) != IS_STRING
+                                 || Z_TYPE_P(methodName) != IS_STRING
+                                 )
+                                 {
+                                   fprintf(stdout, "oops\n");
+                                   RETURN_BOOL(0);
+                                 }
+
+  zend_bool result = registerInterceptor(className, methodName, interceptorClass, 1);
 
   RETURN_BOOL(result);
 }
@@ -137,10 +153,32 @@ PHP_FUNCTION(trace_function)
                                    RETURN_BOOL(0);
                                  }
 
-  zend_bool result = registerInterceptor(NULL, functionName, interceptorClass);
+  zend_bool result = registerInterceptor(NULL, functionName, interceptorClass, 0);
 
   RETURN_BOOL(result);
 }
+
+// PHP_FUNCTION(trace_function_internal)
+// {
+//   zval* functionName;
+//   zval* interceptorClass;
+
+// fprintf(stdout, "trace_function_internal 0\n");
+
+//   // https://www.php.net/manual/de/internals2.funcs.php
+//   if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sO", &functionName,
+//                                  &interceptorClass, zend_ce_closure) != SUCCESS
+//                                  || Z_TYPE_P(functionName) != IS_STRING
+//                                  )
+//                                  {
+//                                    fprintf(stdout, "trace_function_internal oops %d\n", Z_TYPE_P(functionName));
+//                                    RETURN_BOOL(0);
+//                                  }
+// fprintf(stdout, "trace_function_internal 2\n");
+//   zend_bool result = registerInterceptor(NULL, functionName, interceptorClass, 1);
+
+//   RETURN_BOOL(result);
+// }
 
 int phpprofiler_zend_extension_startup(struct _zend_extension *extension) {
     fprintf(stdout, "phpprofiler_zend_extension_startup\n");
@@ -159,14 +197,27 @@ ZEND_ARG_INFO(0, methodName)
 ZEND_ARG_INFO(0, interceptorClass)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_trace_method_internal, 0, 0, 3)
+ZEND_ARG_INFO(0, className)
+ZEND_ARG_INFO(0, methodName)
+ZEND_ARG_INFO(0, interceptorClass)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_trace_function, 0, 0, 2)
 ZEND_ARG_INFO(0, functionName)
 ZEND_ARG_INFO(0, interceptorClass)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_trace_function_internal, 0, 0, 2)
+ZEND_ARG_INFO(0, functionName)
+ZEND_ARG_INFO(0, interceptorClass)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry phpprofiler_functions[] = {
-  PHP_FE(trace_method, arginfo_trace_method)
-  PHP_FE(trace_function, arginfo_trace_function)
+  // PHP_FE(trace_method, arginfo_trace_method)
+  // PHP_FE(trace_function, arginfo_trace_function)
+  // PHP_FE(trace_function_internal, arginfo_trace_function_internal)
+  PHP_FE(trace_method_internal, arginfo_trace_method_internal)
 	PHP_FE_END
 };
 

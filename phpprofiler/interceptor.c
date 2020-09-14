@@ -48,12 +48,36 @@ HashTable* getMethodLookup(HashTable* table, zval *methodName)
   return getMethodLookupStr(table, Z_STR_P(methodName));
 }
 
-zend_bool registerInterceptor(zval *className, zval *functionName, zval *interceptorClass)
+ZEND_FUNCTION(internalFunctionWrapperZ)
+{
+  fprintf(stdout, "zend internalFunctionWrapper\n");
+}
+
+PHP_FUNCTION(internalFunctionWrapperP) {
+  fprintf(stdout, "php internalFunctionWrapper\n");
+}
+
+zend_bool registerInterceptor(zval *className, zval *functionName, zval *interceptorClass, int asInternal)
 {
   HashTable* classLookup = getClassLookup(className TSRMLS_CC);
   HashTable* methodLookup = getMethodLookup(classLookup, functionName);
 
   zend_hash_add_new(methodLookup, Z_STR_P(interceptorClass), interceptorClass);
+
+  if (asInternal == 1)
+  {
+    zend_function* function = zend_hash_find(CG(function_table), Z_STR_P(functionName));
+    if (function)
+    {
+      function->internal_function.handler = ZEND_FN(internalFunctionWrapperZ);
+    }
+
+    zend_internal_function* internalFunction = zend_hash_find(CG(function_table), Z_STR_P(functionName));
+    if (function)
+    {
+      internalFunction->handler = PHP_FN(internalFunctionWrapperP);
+    }
+  }
 
   return SUCCESS;
 }

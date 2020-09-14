@@ -10,7 +10,7 @@ phpize
 ./configure
 make
 
-php -d extension=modules/phpprofiler.so test.php
+PHPPROFILER_CONFIGURATION=/mnt/d/playground/phpprofiler/phpprofiler/interceptions/loader.php php -d extension=modules/phpprofiler.so test.php
 
 ```
 

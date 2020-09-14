@@ -15,6 +15,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 # endif
 
 ZEND_BEGIN_MODULE_GLOBALS(phpprofiler)
+  // HashTable* internalLookup;
   HashTable* lookup;
   CallStack* callStack;
 ZEND_END_MODULE_GLOBALS(phpprofiler)

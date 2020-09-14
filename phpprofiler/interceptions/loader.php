@@ -31,7 +31,9 @@ class TestInterceptor2 {
 // trace_method("TestClass", "TestMethod", 'TestInterceptor');
 // trace_method("TestClass", "TestMethod2", 'TestInterceptor2');
 
-trace_method("", "testF", 'TestInterceptor2');
-trace_method("", "testY", 'TestInterceptor2');
+// trace_method("", "testF", 'TestInterceptor2');
+// trace_method("", "testY", 'TestInterceptor2');
+// trace_function("testY", 'TestInterceptor2');
+trace_method_internal("", "curl_init", 'TestInterceptor2');
 
 ?>
